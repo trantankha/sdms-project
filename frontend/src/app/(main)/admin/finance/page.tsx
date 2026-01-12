@@ -95,7 +95,7 @@ export default function FinancePage() {
         try {
             await financeService.createPayment({
                 invoice_id: invoice.id,
-                amount: invoice.remaining_amount,
+                amount: invoice.remaining_amount ?? 0,
                 payment_method: "TIEN_MAT" as any,
             });
             toast({ title: "Thành công", description: "Đã cập nhật thanh toán." });

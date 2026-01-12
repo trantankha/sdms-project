@@ -1,0 +1,22 @@
+# .dockerignore
+
+# 1. Bỏ qua Git (Không cần thiết)
+.git
+.gitignore
+
+# 2. Bỏ qua Frontend rác (CỰC KỲ QUAN TRỌNG)
+frontend/node_modules
+frontend/.next
+frontend/out
+frontend/build
+frontend/npm-debug.log
+
+# 3. Bỏ qua Backend rác
+backend/__pycache__
+backend/venv
+backend/.env
+backend/*.pyc
+backend/*.pyo
+
+# 4. File cấu hình Docker (Không cần copy chính nó vào trong)
+docker-compose.yml

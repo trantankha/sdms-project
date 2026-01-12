@@ -1,6 +1,8 @@
 import uvicorn
 import logging
 import sys
+import time
+from sqlalchemy.exc import OperationalError
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine.url import make_url
 from alembic import command
@@ -61,11 +63,23 @@ def run_migrations() -> None:
         sys.exit(1)
 
 if __name__ == "__main__":
-    # 1. Initialize Database (Create -> Migrate -> Seed)
-    # init_db()
+    # 1. Initialize Database (Với cơ chế thử lại 30 lần)
+    max_retries = 30
+    for i in range(max_retries):
+        try:
+            logger.info(f"Attempting to connect to database ({i+1}/{max_retries})...")
+            init_db()
+            logger.info("Database connection & initialization successful!")
+            break # Kết nối thành công thì thoát vòng lặp
+        except OperationalError:
+            if i < max_retries - 1:
+                logger.warning("Database not ready yet. Retrying in 2 seconds...")
+                time.sleep(2) # Đợi 2 giây rồi thử lại
+            else:
+                logger.error("Failed to connect to database after multiple attempts.")
+                sys.exit(1) # Hết kiên nhẫn thì mới tắt app
     
-    # 2. Run Migrations (Already run in init_db)
-    # run_migrations()
+    # 2. Run Migrations (Đã chạy trong init_db rồi nên thôi)
     
     # 3. Start Server
     logger.info("Starting server...")

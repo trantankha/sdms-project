@@ -1,29 +1,17 @@
-# Sử dụng Python 3.10 slim để nhẹ (khoảng 150MB thay vì 800MB)
-FROM python:3.10-slim
+# Sử dụng Python phiên bản nhẹ (slim hoặc alpine)
+FROM python:3.11-slim
 
-# Thiết lập biến môi trường:
-# PYTHONDONTWRITEBYTECODE: Ngăn Python tạo file .pyc
-# PYTHONUNBUFFERED: Log in ra console ngay lập tức (quan trọng khi debug Docker)
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
+# Đặt thư mục làm việc trong container
 WORKDIR /app
 
-# Cài đặt các dependencies hệ thống cần thiết cho psycopg2 (Postgres driver)
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends gcc libpq-dev \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy requirements trước để tận dụng Docker Cache
+# Copy file thư viện vào trước để tận dụng cache của Docker (Build nhanh hơn)
 COPY requirements.txt .
+
+# Cài đặt các thư viện (FastAPI, Uvicorn, SQLAlchemy, Psycopg2...)
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy toàn bộ source code
+# Copy toàn bộ code còn lại vào container
 COPY . .
 
-# Mở port 8000
-EXPOSE 8000
-
-# Lệnh chạy mặc định (có thể bị override bởi docker-compose)
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# (Tùy chọn) Command mặc định, nhưng ta sẽ ghi đè ở docker-compose để tiện dev
+# CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

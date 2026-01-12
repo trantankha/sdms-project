@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # 1. DATABASE
   db:
     image: postgres:15-alpine
     volumes:
@@ -12,17 +13,32 @@ services:
     ports:
       - "5432:5432"
 
+  # 2. BACKEND (FastAPI)
   backend:
-    build: ./backend
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    build: ./backend              
+    command: python run.py
     volumes:
-      - ./backend:/app
+      - ./backend:/app            
     ports:
       - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://sdms_admin:sdms_password@db/sdms_db
     depends_on:
       - db
+
+  # 3. FRONTEND (Next.js)
+  frontend:
+    build: ./frontend             
+    command: npm run dev          
+    volumes:
+      - ./frontend:/app           
+      - /app/node_modules         
+    ports:
+      - "3000:3000"               
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - backend
 
 volumes:
   postgres_data:
