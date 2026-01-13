@@ -1,0 +1,12 @@
+# Basics
+__pycache__
+venv
+.git
+.gitignore
+.dockerignore
+Dockerfile
+
+# Python
+*.pyc
+*.pyo
+.env

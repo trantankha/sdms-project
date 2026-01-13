@@ -5,17 +5,13 @@ import Cookies from 'js-cookie';
 
 export const authService = {
     async login(credentials: LoginCredentials): Promise<AuthResponse> {
-        const formData = new FormData();
-        formData.append('username', credentials.username);
-        formData.append('password', credentials.password);
+        const params = new URLSearchParams();
+        params.append('username', credentials.username);
+        params.append('password', credentials.password);
 
-        // The backend expects x-www-form-urlencoded for OAuth2 password flow usually, 
-        // but let's check if it accepts FormData or URLSearchParams. 
-        // FastAPI's OAuth2PasswordRequestForm expects form data.
-
-        const response = await api.post<AuthResponse>('/api/v1/auth/login/access-token', formData, {
+        const response = await api.post<AuthResponse>('/api/v1/auth/login/access-token', params, {
             headers: {
-                'Content-Type': 'multipart/form-data',
+                'Content-Type': 'application/x-www-form-urlencoded',
             },
         });
 

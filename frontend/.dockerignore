@@ -1,0 +1,16 @@
+# Basics
+node_modules
+.git
+.gitignore
+.dockerignore
+Dockerfile
+
+# Next.js
+.next
+out
+build
+npm-debug.log
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local

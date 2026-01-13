@@ -37,7 +37,12 @@ def init_db() -> None:
                 logger.info(f"Database '{db_name}' already exists.")
         
         # 2. Run Migrations
-        run_migrations()
+        # Use a separate try-block to ensure we catch migration errors specifically
+        try:
+            run_migrations()
+        except Exception as e:
+            logger.error(f"Failed during migration phase: {e}")
+            raise e
 
         # 3. Seed Data
         logger.info("Seeding initial data...")
@@ -45,6 +50,9 @@ def init_db() -> None:
         try:
             seed_db(db)
             logger.info("Database seeding completed successfully!")
+        except Exception as e:
+            logger.error(f"Seeding failed: {e}")
+            # We assume seeding failure shouldn't stop the app completely, but it is critical enough to log loudly
         finally:
             db.close()
                 
@@ -56,11 +64,14 @@ def run_migrations() -> None:
     try:
         logger.info("Running database migrations...")
         alembic_cfg = Config("alembic.ini")
+        # Ensure we're using the correct connection URL
+        alembic_cfg.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
         command.upgrade(alembic_cfg, "head")
         logger.info("Migrations completed successfully.")
     except Exception as e:
         logger.error(f"Migration failed: {e}")
-        sys.exit(1)
+        # Re-raise exception to stop execution in init_db
+        raise e
 
 if __name__ == "__main__":
     # 1. Initialize Database (Với cơ chế thử lại 30 lần)
@@ -79,9 +90,7 @@ if __name__ == "__main__":
                 logger.error("Failed to connect to database after multiple attempts.")
                 sys.exit(1) # Hết kiên nhẫn thì mới tắt app
     
-    # 2. Run Migrations (Đã chạy trong init_db rồi nên thôi)
-    
-    # 3. Start Server
+    # 2. Start Server
     logger.info("Starting server...")
     uvicorn.run(
         "app.main:app",
